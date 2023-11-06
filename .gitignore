@@ -1,0 +1,5 @@
+.env
+node_modules/
+bazaarDB.ts
+data.json
+izbb-sebzemeyve-hal-fiyatlari.csv
