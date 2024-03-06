@@ -3,7 +3,6 @@ import { Model } from '../models/data';
 
 const router = express.Router();
 
-//Get all Method
 router.get('/getAll', async (req, res) => {
     try {
         const datas = await Model.find();
@@ -14,7 +13,6 @@ router.get('/getAll', async (req, res) => {
     }
 });
 
-//get by anything
 router.get('/getName/:mal_adi', async (req, res) => {
     try {
         const mal_adi = req.params.mal_adi;
