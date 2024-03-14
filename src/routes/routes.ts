@@ -17,8 +17,9 @@ router.get('/getAll', async (req, res) => {
 //get by anything
 router.get('/getName/:mal_adi', async (req, res) => {
     try {
-        const mal_adi = req.params.mal_adi;
-        const data = await Model.find({ MAL_ADI: mal_adi });
+        const mal_adi = req.params.mal_adi.trim();
+        const regex = new RegExp(`^${mal_adi}`, 'i')
+        const data = await Model.find({ MAL_ADI: { $regex: regex } });
         res.json(data);
     }
     catch (error:any) {
@@ -28,9 +29,10 @@ router.get('/getName/:mal_adi', async (req, res) => {
 
 router.get('/getOrt/:mal_adi', async (req, res) => {
     try{
-        const mal_adi = req.params.mal_adi; 
+        const mal_adi = req.params.mal_adi.trim();
+        const regex = new RegExp(`^${mal_adi}`, 'i') 
         const data = await Model.aggregate([
-            { $match: {MAL_ADI: mal_adi } },
+            { $match: {MAL_ADI: { $regex: regex } } },
             { $group: {_id: null, Ortalama: { $avg: "$ORTALAMA_UCRET" } } }
         ]);
         res.json(data)
@@ -42,7 +44,8 @@ router.get('/getOrt/:mal_adi', async (req, res) => {
 
 router.get('/getOrt/:mal_adi/:yil', async (req, res) => {
     try{
-        const mal_adi = req.params.mal_adi; 
+        const mal_adi = req.params.mal_adi.trim(); 
+        const regex = new RegExp(`^${mal_adi}`, 'i');
         const yil = req.params.yil;
 
         const baslangicTarihi = `${yil}-01-01`; 
@@ -61,7 +64,7 @@ router.get('/getOrt/:mal_adi/:yil', async (req, res) => {
             },
             {
                 $match: {
-                    MAL_ADI: mal_adi,
+                    MAL_ADI: { $regex: regex },
                     convertedDate: {
                         $gte: new Date(baslangicTarihi),
                         $lt: new Date(bitisTarihi)
@@ -91,7 +94,8 @@ router.get('/getOrt/:mal_adi/:yil', async (req, res) => {
 
 router.get('/getOrt/:mal_adi/:yil/:ay', async (req, res) => {
     try{
-        const mal_adi = req.params.mal_adi;
+        const mal_adi = req.params.mal_adi.trim();
+        const regex = new RegExp(`^${mal_adi}`, 'i');
         const yil = req.params.yil;
         let ay = Number(req.params.ay);
         
@@ -115,7 +119,7 @@ router.get('/getOrt/:mal_adi/:yil/:ay', async (req, res) => {
             },
             {
                 $match: {
-                    MAL_ADI: mal_adi,
+                    MAL_ADI: { $regex: regex },
                     convertedDate: {
                         $gte: new Date(baslangic_tarihi),
                         $lt: new Date(bitis_tarihi)
@@ -147,7 +151,8 @@ router.get('/getOrt/:mal_adi/:yil/:ay', async (req, res) => {
 router.get('/getOrt/:mal_adi/:yil/:ay/:gun', async (req, res) => {
     
     try{
-        const mal_adi = req.params.mal_adi;
+        const mal_adi = req.params.mal_adi.trim();
+        const regex = new RegExp(`^${mal_adi}`, 'i');
         const yil = req.params.yil;
         const ay = req.params.ay;
         const gun = req.params.gun;
@@ -172,7 +177,7 @@ router.get('/getOrt/:mal_adi/:yil/:ay/:gun', async (req, res) => {
                 },
                 {
                     $match: {
-                        MAL_ADI: mal_adi,
+                        MAL_ADI: { $regex: regex },
                         convertedDate:new Date(tarih)
                         
                     }
