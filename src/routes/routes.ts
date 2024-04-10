@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.get('/getAll', async (req, res) => {
     try {
-        const datas = await Model.find();
-        res.json(datas);
+        const [datas, uniqueMalAdiValues] = await Promise.all([Model.find(), Model.distinct('MAL_ADI')]);
+        res.json({datas: datas, uniqueMalAdiValues: uniqueMalAdiValues});
     }
     catch (error:any) {
         res.status(500).json({ message: error.message });
@@ -51,19 +51,9 @@ router.get('/getOrt/:mal_adi/:yil', async (req, res) => {
 
         const data = await Model.aggregate([
             {
-                $addFields: {
-                    convertedDate: {
-                        $dateFromString: {
-                            dateString: "$TARIH",
-                            format: "%Y-%m-%d"
-                        }
-                    }
-                }
-            },
-            {
                 $match: {
                     MAL_ADI: { $regex: regex },
-                    convertedDate: {
+                    TARIH: {
                         $gte: new Date(baslangicTarihi),
                         $lt: new Date(bitisTarihi)
                     }
@@ -106,19 +96,9 @@ router.get('/getOrt/:mal_adi/:yil/:ay', async (req, res) => {
             const bitis_tarihi = `${ay === 1 ? Number(yil) + 1 : yil}-${ay < 10 ? '0' + ay : ay}-01`;
             const data = await Model.aggregate([
             {
-                $addFields: {
-                    convertedDate: {
-                        $dateFromString: {
-                            dateString: "$TARIH",
-                            format: "%Y-%m-%d"
-                        }
-                    }
-                }
-            },
-            {
                 $match: {
                     MAL_ADI: { $regex: regex },
-                    convertedDate: {
+                    TARIH: {
                         $gte: new Date(baslangic_tarihi),
                         $lt: new Date(bitis_tarihi)
                     }
@@ -152,8 +132,8 @@ router.get('/getOrt/:mal_adi/:yil/:ay/:gun', async (req, res) => {
         let mal_adi = req.params.mal_adi.trim();
         const regex = new RegExp(`${mal_adi.split(' ').join('\\s+')}`, 'i');
         const yil = req.params.yil;
-        const ay = req.params.ay;
-        const gun = req.params.gun;
+        const ay = req.params.ay.padStart(2, '0');
+        const gun = req.params.gun.padStart(2, '0');
 
         if(Number(ay) > 12 || Number(gun) > 31){
             res.status(500).json({message: "Uygun değer giriniz"});
@@ -164,20 +144,9 @@ router.get('/getOrt/:mal_adi/:yil/:ay/:gun', async (req, res) => {
 
             const data = await Model.aggregate([
                 {
-                    $addFields: {
-                        convertedDate: {
-                            $dateFromString: {
-                                dateString: "$TARIH",
-                                format: "%Y-%m-%d"
-                            }
-                        }
-                    }
-                },
-                {
                     $match: {
                         MAL_ADI: { $regex: regex },
-                        convertedDate:new Date(tarih)
-                        
+                        TARIH:new Date(tarih)        
                     }
                 },
                 {
@@ -208,36 +177,28 @@ router.get('/getdate/:yil/:ay/:gun', async (req, res) => {
     
     try{
         const yil = req.params.yil;
-        const ay = req.params.ay;
-        const gun = req.params.gun;
+        const ay = req.params.ay.padStart(2, '0');
+        const gun = req.params.gun.padStart(2, '0');
 
         if(Number(ay) > 12 || Number(gun) > 31){
             res.status(500).json({message: "Uygun değer giriniz"});
         }
 
         else{
-            const tarih = `${yil}-${ay}-${gun}`;
+            const tarih = new Date(`${yil}-${ay}-${gun}`);
 
             const data = await Model.aggregate([
                 {
-                    $addFields: {
-                        convertedDate: {
-                            $dateFromString: {
-                                dateString: "$TARIH",
-                                format: "%Y-%m-%d"
-                            }
-                        }
-                    }
-                },
-                {
                     $match: {
-                        convertedDate:new Date(tarih)    
+                        TARIH:tarih    
                     }
-                }
-                
+                }   
             ]);
-    
-            res.json(data);
+            const malAdiValues = data.map(doc => doc.MAL_ADI);
+            const uniqueMalAdiValues = [...new Set(malAdiValues)];
+            uniqueMalAdiValues.sort();
+
+            res.json({datas: data, uniqueMalAdiValues: uniqueMalAdiValues});
         }
    
     }
@@ -246,5 +207,67 @@ router.get('/getdate/:yil/:ay/:gun', async (req, res) => {
         res.status(500).json({message: error.message});
     }
 })
+
+router.get('/getay/:yil/:ay', async (req, res) => {
+    try{
+        const yil = req.params.yil;
+        let ay = Number(req.params.ay);
+        
+        if (ay > 12){
+            res.status(500).json({message: "12'den büyük değer alamaz"});
+        }
+        else{
+            const baslangic_tarihi = `${yil}-${ay < 10 ? '0' + ay : ay}-01`;
+            ay = ay + 1 > 12 ? 1 : ay + 1;
+            const bitis_tarihi = `${ay === 1 ? Number(yil) + 1 : yil}-${ay < 10 ? '0' + ay : ay}-01`;
+            const data = await Model.aggregate([
+            {
+                $match: {
+                    TARIH: {
+                        $gte: new Date(baslangic_tarihi),
+                        $lt: new Date(bitis_tarihi)
+                    }
+                }
+            }
+        ]);
+        const malAdiValues = data.map(doc => doc.MAL_ADI);
+        const uniqueMalAdiValues = [...new Set(malAdiValues)];
+        uniqueMalAdiValues.sort();
+        res.json(uniqueMalAdiValues);
+        }
+     
+    }
+    catch(error:any){
+        res.status(500).json({message: error.message});
+    }
+})
+
+router.get('/getyil/:yil', async (req, res) => {
+    try{
+        const yil = req.params.yil;
+
+        const baslangicTarihi = `${yil}-01-01`; 
+        const bitisTarihi = `${Number(yil) + 1}-01-01`; 
+
+        const data = await Model.aggregate([
+            {
+                $match: {
+                    TARIH: {
+                        $gte: new Date(baslangicTarihi),
+                        $lt: new Date(bitisTarihi)
+                    }
+                }
+            }
+        ]);
+        const malAdiValues = data.map(doc => doc.MAL_ADI);
+        const uniqueMalAdiValues = [...new Set(malAdiValues)];
+        uniqueMalAdiValues.sort();
+        res.json(uniqueMalAdiValues);
+    
+    }
+    catch(error:any){
+        res.status(500).json({message: error.message});
+    }
+});
 
 export default router;
