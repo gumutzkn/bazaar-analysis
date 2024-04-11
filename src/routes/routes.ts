@@ -205,8 +205,8 @@ router.get('/getdate/:yil/:ay/:gun', async (req, res) => {
                     }
                 }   
             ]);
-
-            res.json({datas: data});
+            const uniqueMalAdiValues = data.map(doc => doc._id);
+            res.json({datas: data,uniqueMalAdiValues:uniqueMalAdiValues});
         }
    
     }
