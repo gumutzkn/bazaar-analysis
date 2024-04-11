@@ -217,9 +217,9 @@ router.get('/getay/:yil/:ay', async (req, res) => {
             res.status(500).json({message: "12'den büyük değer alamaz"});
         }
         else{
-            const baslangic_tarihi = `${yil}-${ay < 10 ? '0' + ay : ay}-01`;
+            const baslangic_tarihi = `${yil}-${ay}-01`;
             ay = ay + 1 > 12 ? 1 : ay + 1;
-            const bitis_tarihi = `${ay === 1 ? Number(yil) + 1 : yil}-${ay < 10 ? '0' + ay : ay}-01`;
+            const bitis_tarihi = `${ay === 1 ? Number(yil) + 1 : yil}-${ay}-01`;
             const data = await Model.aggregate([
             {
                 $match: {
@@ -228,11 +228,19 @@ router.get('/getay/:yil/:ay', async (req, res) => {
                         $lt: new Date(bitis_tarihi)
                     }
                 }
+            },
+            {
+                $group: {
+                    _id: "$MAL_ADI"
+                }
+            },
+            {
+                $sort: {
+                    _id: 1
+                }
             }
         ]);
-        const malAdiValues = data.map(doc => doc.MAL_ADI);
-        const uniqueMalAdiValues = [...new Set(malAdiValues)];
-        uniqueMalAdiValues.sort();
+        const uniqueMalAdiValues = data.map(doc => doc._id);
         res.json(uniqueMalAdiValues);
         }
      
@@ -240,7 +248,8 @@ router.get('/getay/:yil/:ay', async (req, res) => {
     catch(error:any){
         res.status(500).json({message: error.message});
     }
-})
+});
+
 
 router.get('/getyil/:yil', async (req, res) => {
     try{
@@ -257,17 +266,25 @@ router.get('/getyil/:yil', async (req, res) => {
                         $lt: new Date(bitisTarihi)
                     }
                 }
+            },
+            {
+                $group: {
+                    _id: "$MAL_ADI"
+                }
+            },
+            {
+                $sort: {
+                    _id: 1
+                }
             }
         ]);
-        const malAdiValues = data.map(doc => doc.MAL_ADI);
-        const uniqueMalAdiValues = [...new Set(malAdiValues)];
-        uniqueMalAdiValues.sort();
+        const uniqueMalAdiValues = data.map(doc => doc._id);
         res.json(uniqueMalAdiValues);
-    
     }
     catch(error:any){
         res.status(500).json({message: error.message});
     }
 });
+
 
 export default router;
