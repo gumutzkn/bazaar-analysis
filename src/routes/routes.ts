@@ -192,13 +192,21 @@ router.get('/getdate/:yil/:ay/:gun', async (req, res) => {
                     $match: {
                         TARIH:tarih    
                     }
+                },
+                {
+                    $group: {
+                        _id: "$MAL_ADI",
+                        ORTALAMA_UCRET: { $avg: "$ORTALAMA_UCRET" }
+                    }
+                },
+                {
+                    $sort: {
+                        _id: 1
+                    }
                 }   
             ]);
-            const malAdiValues = data.map(doc => doc.MAL_ADI);
-            const uniqueMalAdiValues = [...new Set(malAdiValues)];
-            uniqueMalAdiValues.sort();
 
-            res.json({datas: data, uniqueMalAdiValues: uniqueMalAdiValues});
+            res.json({datas: data});
         }
    
     }
@@ -206,7 +214,7 @@ router.get('/getdate/:yil/:ay/:gun', async (req, res) => {
     catch(error:any){
         res.status(500).json({message: error.message});
     }
-})
+});
 
 router.get('/getay/:yil/:ay', async (req, res) => {
     try{
