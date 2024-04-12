@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
+import cors from 'cors'
 import routes from './routes/routes';
 import { config } from './config/config';
 import { connectDB } from './db/connect';
@@ -18,6 +19,9 @@ connectDB()
     console.error('Error connecting to MongoDB:', error);
     process.exit(1); 
   });
+
+// cors
+app.use(cors());
 
 app.use('/api', routes);
 
