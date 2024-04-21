@@ -258,7 +258,6 @@ router.get('/getay/:yil/:ay', async (req, res) => {
     }
 });
 
-
 router.get('/getyil/:yil', async (req, res) => {
     try{
         const yil = req.params.yil;
@@ -294,5 +293,72 @@ router.get('/getyil/:yil', async (req, res) => {
     }
 });
 
+router.get('/getcomparepast/:mal_adi/:yil/:ay', async (req, res) => {
+    try{
+        const mal_adi = req.params.mal_adi.trim();
+        const regex = new RegExp(`^${mal_adi}`, 'i');
+        let yil = Number(req.params.yil.padStart(2, '0'));
+        let ay = Number(req.params.ay.padStart(2, '0'));
+        
+        if (ay > 12){
+            res.status(500).json({message: "12'den büyük değer alamaz"});
+        }
+        else{
+            const baslangic_tarihi = `${yil}-${ay}-01`;
+            const past_baslangic_tarihi = `${yil-1}-${ay}-01`;
+            ay = ay + 1 > 12 ? 1 : ay + 1;
+            const bitis_tarihi = `${ay === 1 ? yil + 1 : yil}-${ay}-01`;
+            const past_bitis_tarihi = `${ay === 1 ? yil : yil-1}-${ay}-01`;
+            const datanow = await Model.aggregate([
+            {
+                $match: {
+                    MAL_ADI: { $regex: regex },
+                    TARIH: {
+                        $gte: new Date(baslangic_tarihi),
+                        $lt: new Date(bitis_tarihi)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    Ortalama: { $avg: "$ORTALAMA_UCRET"}
+                }
+            }
+        ]);
+        const datapast = await Model.aggregate([
+            {
+                $match: {
+                    MAL_ADI: { $regex: regex },
+                    TARIH: {
+                        $gte: new Date(past_baslangic_tarihi),
+                        $lt: new Date(past_bitis_tarihi)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    Ortalama: { $avg: "$ORTALAMA_UCRET"}
+                }
+            }
+        ]);
 
+        res.json({
+            Meyve_Sebze: mal_adi,
+            Baslangic_Tarihi: baslangic_tarihi,
+            Bitis_Tarihi: bitis_tarihi,
+            Aylik_Ortalama_Ucret: datanow.length > 0 ? datanow[0].Ortalama : 0, 
+        
+            Geçmiş_Baslangic: past_baslangic_tarihi,
+            Geçmiş_Bitis: past_bitis_tarihi,
+            Geçmiş_Aylik_Ortalama_Ucret: datapast.length > 0 ? datapast[0].Ortalama : 0 
+        });
+        }
+     
+    }
+    catch(error:any){
+        res.status(500).json({message: error.message});
+    }
+})
 export default router;
