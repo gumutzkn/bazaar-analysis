@@ -23,6 +23,12 @@ MONGO_DBNAME=<your_mongo_dbname>
 SERVER_PORT=<port>
 ```
 
+4. Sunucuyu başlat:
+
+```bash
+npm start
+```
+
 ## Enpoints
 
 ### Bütün ürünleri listele
