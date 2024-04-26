@@ -183,14 +183,7 @@ SERVER_PORT=<port>
 - Örnek yanıt:
 
 ```json
-{
-	[
-    "ALABAŞ",
-    "ANANAS",
-    "ARMUT DEVECI",
-    "ARMUT S.MARIA"
-  ]
-}
+["ALABAŞ", "ANANAS", "ARMUT DEVECI", "ARMUT S.MARIA"]
 ```
 
 ### Get data by year
@@ -201,12 +194,5 @@ SERVER_PORT=<port>
 - Örnek yanıt:
 
 ```json
-{
-	[
-    "ALABAŞ",
-    "ANANAS",
-    "ARMUT DEVECI",
-    "ARMUT S.MARIA"
-  ]
-}
+["ALABAŞ", "ANANAS", "ARMUT DEVECI", "ARMUT S.MARIA"]
 ```
