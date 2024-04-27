@@ -33,7 +33,7 @@ router.get('/getOrt/:mal_adi', async (req, res) => {
             { $match: {MAL_ADI: { $regex: regex } } },
             { $group: {_id: null, Ortalama: { $avg: "$ORTALAMA_UCRET" } } }
         ]);
-        res.json(data)
+        res.json({Ortalama:data.length > 0 ? data[0].Ortalama : 0})
     }
     catch(error:any){
         res.status(500).json({message: error.message})
@@ -61,17 +61,23 @@ router.get('/getOrt/:mal_adi/:yil', async (req, res) => {
             },
             {
                 $group: {
-                    _id: null,
+                    _id: { month: { $month: "$TARIH" } },
                     Ortalama: { $avg: "$ORTALAMA_UCRET" }
                 }
+            },
+            {
+                $sort: { "_id.month": 1 }
             }
         ]);
+
+        const yillikOrtalama = data.reduce((acc, val) => acc + val.Ortalama, 0) / data.length;
 
         res.json({
             Meyve_Sebze: mal_adi,
             Baslangic_Tarihi: baslangicTarihi,
             Bitis_Tarihi: bitisTarihi,
-            Yillik_Ortalama_Ucret: data.length > 0 ? data[0].Ortalama : 0
+            Yillik_Ortalama_Ucret: yillikOrtalama,
+            Aylik_Ortalamalar: data
         });
         
     }
