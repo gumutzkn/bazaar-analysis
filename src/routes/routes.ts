@@ -112,9 +112,12 @@ router.get('/getOrt/:mal_adi/:yil/:ay', async (req, res) => {
             },
             {
                 $group: {
-                    _id: null,
+                    _id: { $dayOfMonth: "$TARIH"},
                     Ortalama: { $avg: "$ORTALAMA_UCRET"}
                 }
+            },
+            {
+                $sort: {"_id": 1 }
             }
         ]);
 
@@ -122,7 +125,8 @@ router.get('/getOrt/:mal_adi/:yil/:ay', async (req, res) => {
             Meyve_Sebze: mal_adi,
             Baslangic_Tarihi: baslangic_tarihi,
             Bitis_Tarihi: bitis_tarihi,
-            Aylık_Ortalama_Ucret: data.length > 0 ? data[0].Ortalama : 0 
+            Aylik_Ortalama_Ucret: data.reduce((acc, val) => acc + val.Ortalama, 0) / data.length,
+            Gunluk_Ortalamalar: data.map(item => ({Gun: item._id, Ortalama: item.Ortalama}))
         });
         }
      
