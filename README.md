@@ -98,7 +98,7 @@ npm start
 
 - URL: `/getOrt/:mal_adi`
 - Method: `GET`
-- Description: Her malın `ORTALAMA_UCRET` ini hesaplar
+- Description: Her malın `ORTALAMA_UCRET` ini tüm veriden hesaplar
 - Örnek yanıt:
 
 ```json
@@ -122,7 +122,22 @@ npm start
 	"Meyve_Sebze": "elma",
 	"Baslangic_Tarihi": "2023-01-01",
 	"Bitis_Tarihi": "2024-01-01",
-	"Yillik_Ortalama_Ucret": 17.860945644080417
+	"Yillik_Ortalama_Ucret": 17.875635205233593,
+	"Aylik_Ortalamalar": [
+        {
+            "_id": {
+                "month": 1
+            },
+            "Ortalama": 12.09870848708487
+        },
+        {
+            "_id": {
+                "month": 2
+            },
+            "Ortalama": 13.359110169491526
+        },
+		...
+		]
 }
 ```
 
@@ -138,7 +153,18 @@ npm start
 	"Meyve_Sebze": "elma",
 	"Baslangic_Tarihi": "2023-05-01",
 	"Bitis_Tarihi": "2023-06-01",
-	"Aylık_Ortalama_Ucret": 13.291666666666666
+	"Aylık_Ortalama_Ucret": 13.291666666666666,
+	"Gunluk_Ortalamalar": [
+        {
+            "Gun": 1,
+            "Ortalama": 13.0625
+        },
+        {
+            "Gun": 2,
+            "Ortalama": 13.0625
+        },
+		...
+	]
 }
 ```
 
@@ -152,9 +178,8 @@ npm start
 ```json
 {
 	"Meyve_Sebze": "elma",
-	"Baslangic_Tarihi": "2023-05-01",
-	"Bitis_Tarihi": "2023-06-01",
-	"Aylık_Ortalama_Ucret": 13.291666666666666
+    "Tarih": "2023-05-01",
+    "Ortalama_Ucret": 13.0625
 }
 ```
 
