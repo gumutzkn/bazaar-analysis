@@ -227,3 +227,21 @@ npm start
 ```json
 ["ALABAŞ", "ANANAS", "ARMUT DEVECI", "ARMUT S.MARIA"]
 ```
+
+### Get compare this year's average with last year's average
+
+- URL: `/getcomparepast/:mal_adi/:yil/:ay`
+- Method: `GET`
+- Description: Calculates the monthly average `ORTALAMA_UCRET` for the provided `MAL_ADI`, year, month for this year and last year
+- Örnek yanıt:
+```json
+{
+    "Meyve_Sebze": "patates",
+    "Baslangic_Tarihi": "2024-1-01",
+    "Bitis_Tarihi": "2024-2-01",
+    "Aylik_Ortalama_Ucret": 13.461538461538462,
+    "Geçmiş_Baslangic": "2023-1-01",
+    "Geçmiş_Bitis": "2023-2-01",
+    "Geçmiş_Aylik_Ortalama_Ucret": 7.716346153846154
+}
+```
