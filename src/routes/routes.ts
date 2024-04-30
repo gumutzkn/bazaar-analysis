@@ -371,4 +371,95 @@ router.get('/getcomparepast/:mal_adi/:yil/:ay', async (req, res) => {
         res.status(500).json({message: error.message});
     }
 })
+
+router.get('/getcompared/:mal_adi/:yil1/:ay1/:yil2/:ay2', async (req, res) => {
+    try{
+        const mal_adi = req.params.mal_adi.trim();
+        const regex = new RegExp(`^${mal_adi}`, 'i');
+        let yil1 = Number(req.params.yil1.padStart(2, '0'));
+        let ay1 = Number(req.params.ay1.padStart(2, '0'));
+        let yil2 = Number(req.params.yil2.padStart(2, '0'));
+        let ay2 = Number(req.params.ay2.padStart(2, '0'));
+        
+        if (ay1 > 12 || ay2 > 12 ){
+            res.status(500).json({message: "12'den büyük değer alamaz"});
+        }
+        else{
+            const baslangic_tarihi1 = `${yil1}-${ay1}-01`;
+            const baslangic_tarihi2 = `${yil2}-${ay2}-01`;
+            ay1 = ay1 + 1 > 12 ? 1 : ay1 + 1;
+            ay2 = ay2 + 1 > 12 ? 1 : ay2 + 1;
+            const bitis_tarihi1 = `${ay1 === 1 ? yil1 + 1 : yil1}-${ay1}-01`;
+            const bitis_tarihi2 = `${ay2 === 1 ? yil2 +1 : yil2}-${ay2}-01`;
+            const [data1, data2] = await Promise.all([
+                Model.aggregate([
+                    {
+                        $match: {
+                            MAL_ADI: { $regex: regex },
+                            TARIH: {
+                                $gte: new Date(baslangic_tarihi1),
+                                $lt: new Date(bitis_tarihi1)
+                            }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            Ortalama: { $avg: "$ORTALAMA_UCRET"}
+                        }
+                    }
+                ]),
+                Model.aggregate([
+                    {
+                        $match: {
+                            MAL_ADI: { $regex: regex },
+                            TARIH: {
+                                $gte: new Date(baslangic_tarihi2),
+                                $lt: new Date(bitis_tarihi2)
+                            }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            Ortalama: { $avg: "$ORTALAMA_UCRET"}
+                        }
+                    }
+                ])
+            ]);
+            const Aylik_Ortalama_Ucret1 = data1.length > 0 ? data1[0].Ortalama : 0;
+            const Aylik_Ortalama_Ucret2 = data2.length > 0 ? data2[0].Ortalama : 0;    
+
+            const yuzdelikFark = ((Aylik_Ortalama_Ucret2 - Aylik_Ortalama_Ucret1) / Aylik_Ortalama_Ucret1) * 100;
+
+            let yorum = '';
+            if (yuzdelikFark > 0) {
+                yorum = `Aylik_Ortalama_Ucret2, Aylik_Ortalama_Ucret1'den %${yuzdelikFark.toFixed(2)} daha yüksek. Bu, fiyatların arttığını gösteriyor.`;
+            } else if (yuzdelikFark < 0) {
+                yorum = `Aylik_Ortalama_Ucret2, Aylik_Ortalama_Ucret1'den %${Math.abs(yuzdelikFark).toFixed(2)} daha düşük. Bu, fiyatların düştüğünü gösteriyor.`;
+            } else {
+                yorum = 'Aylik_Ortalama_Ucret1 ve Aylik_Ortalama_Ucret2 aynı. Bu, fiyatların değişmediğini gösteriyor.';
+            }
+
+            res.json({
+                Meyve_Sebze: mal_adi,
+                Baslangic_Tarihi1: baslangic_tarihi1,
+                Bitis_Tarihi1: bitis_tarihi1,
+                Aylik_Ortalama_Ucret1: Aylik_Ortalama_Ucret1, 
+        
+                Baslangic_Tarihi2: baslangic_tarihi2,
+                Bitis_Tarihi2: bitis_tarihi2,
+                Aylik_Ortalama_Ucret2: Aylik_Ortalama_Ucret2,
+            
+                Yuzdelik_Fark: yuzdelikFark,
+                Yorum: yorum
+            });
+        }
+     
+    }
+    catch(error:any){
+        res.status(500).json({message: error.message});
+    }
+})
+
 export default router;
