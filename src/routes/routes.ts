@@ -387,10 +387,10 @@ router.get('/getcompared/:mal_adi/:yil1/:ay1/:yil2/:ay2', async (req, res) => {
         else{
             const baslangic_tarihi1 = `${yil1}-${ay1}-01`;
             const baslangic_tarihi2 = `${yil2}-${ay2}-01`;
-            ay1 = ay1 + 1 > 12 ? 1 : ay1 + 1;
-            ay2 = ay2 + 1 > 12 ? 1 : ay2 + 1;
-            const bitis_tarihi1 = `${ay1 === 1 ? yil1 + 1 : yil1}-${ay1}-01`;
-            const bitis_tarihi2 = `${ay2 === 1 ? yil2 +1 : yil2}-${ay2}-01`;
+            let ay11 = ay1 + 1 > 12 ? 1 : ay1 + 1;
+            let ay22 = ay2 + 1 > 12 ? 1 : ay2 + 1;
+            const bitis_tarihi1 = `${ay11 === 1 ? yil1 + 1 : yil1}-${ay11}-01`;
+            const bitis_tarihi2 = `${ay22 === 1 ? yil2 +1 : yil2}-${ay22}-01`;
             const [data1, data2] = await Promise.all([
                 Model.aggregate([
                     {
@@ -434,11 +434,11 @@ router.get('/getcompared/:mal_adi/:yil1/:ay1/:yil2/:ay2', async (req, res) => {
 
             let yorum = '';
             if (yuzdelikFark > 0) {
-                yorum = `Aylik_Ortalama_Ucret2, Aylik_Ortalama_Ucret1'den %${yuzdelikFark.toFixed(2)} daha yüksek. Bu, fiyatların arttığını gösteriyor.`;
+                yorum = `${ay2} - ${yil2} fiyatı, ${ay1} - ${yil1} fiyatıdan %${yuzdelikFark.toFixed(2)} daha yüksek. Bu, fiyatların arttığını gösteriyor.`;
             } else if (yuzdelikFark < 0) {
-                yorum = `Aylik_Ortalama_Ucret2, Aylik_Ortalama_Ucret1'den %${Math.abs(yuzdelikFark).toFixed(2)} daha düşük. Bu, fiyatların düştüğünü gösteriyor.`;
+                yorum = `${ay2} - ${yil2} fiyatı, ${ay1} - ${yil1} fiyatından %${Math.abs(yuzdelikFark).toFixed(2)} daha düşük. Bu, fiyatların düştüğünü gösteriyor.`;
             } else {
-                yorum = 'Aylik_Ortalama_Ucret1 ve Aylik_Ortalama_Ucret2 aynı. Bu, fiyatların değişmediğini gösteriyor.';
+                yorum = `${ay2} - ${yil2} ve ${ay1} - ${yil1} fiyatları aynı. Bu, fiyatların değişmediğini gösteriyor.`;
             }
 
             res.json({
