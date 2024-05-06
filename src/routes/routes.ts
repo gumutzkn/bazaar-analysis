@@ -523,7 +523,11 @@ router.get(
 					},
 					{
 						$group: {
-							_id: { day: { $dayOfMonth: '$TARIH' }, month: { $month: '$TARIH' }, year: { $year: '$TARIH' } },
+							_id: {
+								day: { $dayOfMonth: '$TARIH' },
+								month: { $month: '$TARIH' },
+								year: { $year: '$TARIH' },
+							},
 							Ortalama: { $avg: '$ORTALAMA_UCRET' },
 						},
 					},
@@ -540,8 +544,7 @@ router.get(
 					Meyve_Sebze: mal_adi,
 					Baslangic_Tarihi: baslangic_tarihi,
 					Bitis_Tarihi: bitis_tarihi,
-					Ortalama_Ucret:
-						data.reduce((acc, val) => acc + val.Ortalama, 0) / data.length,
+					Ortalama_Ucret: data.reduce((acc, val) => acc + val.Ortalama, 0) / data.length,
 					Gunluk_Ortalamalar: data.map((item) => ({
 						Gun: item._id,
 						Ortalama: item.Ortalama,
@@ -551,7 +554,7 @@ router.get(
 		} catch (error: any) {
 			res.status(500).json({ message: error.message });
 		}
-	}
+	},
 );
 
 export default router;
