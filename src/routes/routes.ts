@@ -453,16 +453,16 @@ router.get('/getselectmonth/:mal_adi/:yil1/:ay1/:yil2/:ay2', async (req, res) =>
 		const ay1 = Number(req.params.ay1.padStart(2, '0'));
 		const ay2 = Number(req.params.ay2.padStart(2, '0'));
 
-		const baslangicTarihi = `${yil1}-${ay1}-01`;
-		const bitisTarihi = `${yil2}-${ay2}-01`;
+		const startDate = `${yil1}-${ay1}-01`;
+		const endDate = `${yil2}-${ay2}-01`;
 
 		const data = await Model.aggregate([
 			{
 				$match: {
 					MAL_ADI: { $regex: regex },
 					TARIH: {
-						$gte: new Date(baslangicTarihi),
-						$lt: new Date(bitisTarihi),
+						$gte: new Date(startDate),
+						$lt: new Date(endDate),
 					},
 				},
 			},
@@ -484,8 +484,8 @@ router.get('/getselectmonth/:mal_adi/:yil1/:ay1/:yil2/:ay2', async (req, res) =>
 
 		res.json({
 			Meyve_Sebze: mal_adi,
-			Baslangic_Tarihi: baslangicTarihi,
-			Bitis_Tarihi: bitisTarihi,
+			Baslangic_Tarihi: startDate,
+			Bitis_Tarihi: endDate,
 			Ortalama_Ucret: yillikOrtalama,
 			Aylik_Ortalamalar: data,
 		});
@@ -509,15 +509,15 @@ router.get(
 			if (ay1 > 12 || ay2 > 12) {
 				res.status(500).json({ message: "12'den büyük değer alamaz" });
 			} else {
-				const baslangic_tarihi = `${yil1}-${ay1}-${gun1}`;
-				const bitis_tarihi = `${yil2}-${ay2}-${gun2}`;
+				const start_date = `${yil1}-${ay1}-${gun1}`;
+				const end_date = `${yil2}-${ay2}-${gun2}`;
 				const data = await Model.aggregate([
 					{
 						$match: {
 							MAL_ADI: { $regex: regex },
 							TARIH: {
-								$gte: new Date(baslangic_tarihi),
-								$lt: new Date(bitis_tarihi),
+								$gte: new Date(start_date),
+								$lt: new Date(end_date),
 							},
 						},
 					},
@@ -542,8 +542,8 @@ router.get(
 
 				res.json({
 					Meyve_Sebze: mal_adi,
-					Baslangic_Tarihi: baslangic_tarihi,
-					Bitis_Tarihi: bitis_tarihi,
+					Baslangic_Tarihi: start_date,
+					Bitis_Tarihi: end_date,
 					Ortalama_Ucret: data.reduce((acc, val) => acc + val.Ortalama, 0) / data.length,
 					Gunluk_Ortalamalar: data.map((item) => ({
 						Gun: item._id,
