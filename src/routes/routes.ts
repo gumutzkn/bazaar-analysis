@@ -444,4 +444,117 @@ router.get('/getcompared/:mal_adi/:yil1/:ay1/:yil2/:ay2', async (req, res) => {
 	}
 });
 
+router.get('/getselectmonth/:mal_adi/:yil1/:ay1/:yil2/:ay2', async (req, res) => {
+	try {
+		let mal_adi = req.params.mal_adi.trim();
+		const regex = new RegExp(`${mal_adi.split(' ').join('\\s+')}`, 'i');
+		const yil1 = req.params.yil1;
+		const yil2 = req.params.yil2;
+		const ay1 = Number(req.params.ay1.padStart(2, '0'));
+		const ay2 = Number(req.params.ay2.padStart(2, '0'));
+
+		const startDate = `${yil1}-${ay1}-01`;
+		const endDate = `${yil2}-${ay2}-01`;
+
+		const data = await Model.aggregate([
+			{
+				$match: {
+					MAL_ADI: { $regex: regex },
+					TARIH: {
+						$gte: new Date(startDate),
+						$lt: new Date(endDate),
+					},
+				},
+			},
+			{
+				$group: {
+					_id: { year: { $year: '$TARIH' }, month: { $month: '$TARIH' } },
+					Ortalama: { $avg: '$ORTALAMA_UCRET' },
+				},
+			},
+			{
+				$sort: {
+					'_id.year': 1,
+					'_id.month': 1,
+				},
+			},
+		]);
+
+		const yillikOrtalama = data.reduce((acc, val) => acc + val.Ortalama, 0) / data.length;
+
+		res.json({
+			Meyve_Sebze: mal_adi,
+			Baslangic_Tarihi: startDate,
+			Bitis_Tarihi: endDate,
+			Ortalama_Ucret: yillikOrtalama,
+			Aylik_Ortalamalar: data,
+		});
+	} catch (error: any) {
+		res.status(500).json({ message: error.message });
+	}
+});
+
+router.get(
+	'/getselectday/:mal_adi/:yil1/:ay1/:gun1/:yil2/:ay2/:gun2',
+	async (req, res) => {
+		try {
+			let mal_adi = req.params.mal_adi.trim();
+			const regex = new RegExp(`${mal_adi.split(' ').join('\\s+')}`, 'i');
+			const yil1 = req.params.yil1;
+			const yil2 = req.params.yil2;
+			const ay1 = Number(req.params.ay1.padStart(2, '0'));
+			const ay2 = Number(req.params.ay2.padStart(2, '0'));
+			const gun1 = req.params.gun1.padStart(2, '0');
+			const gun2 = req.params.gun2.padStart(2, '0');
+			if (ay1 > 12 || ay2 > 12) {
+				res.status(500).json({ message: "12'den büyük değer alamaz" });
+			} else {
+				const start_date = `${yil1}-${ay1}-${gun1}`;
+				const end_date = `${yil2}-${ay2}-${gun2}`;
+				const data = await Model.aggregate([
+					{
+						$match: {
+							MAL_ADI: { $regex: regex },
+							TARIH: {
+								$gte: new Date(start_date),
+								$lt: new Date(end_date),
+							},
+						},
+					},
+					{
+						$group: {
+							_id: {
+								day: { $dayOfMonth: '$TARIH' },
+								month: { $month: '$TARIH' },
+								year: { $year: '$TARIH' },
+							},
+							Ortalama: { $avg: '$ORTALAMA_UCRET' },
+						},
+					},
+					{
+						$sort: {
+							'_id.year': 1,
+							'_id.month': 1,
+							'_id.day': 1,
+						},
+					},
+				]);
+
+				res.json({
+					Meyve_Sebze: mal_adi,
+					Baslangic_Tarihi: start_date,
+					Bitis_Tarihi: end_date,
+					Ortalama_Ucret: data.reduce((acc, val) => acc + val.Ortalama, 0) / data.length,
+					Gunluk_Ortalamalar: data.map((item) => ({
+						Gun: item._id,
+						Ortalama: item.Ortalama,
+					})),
+				});
+			}
+		} catch (error: any) {
+			res.status(500).json({ message: error.message });
+		}
+	},
+);
+
 export default router;

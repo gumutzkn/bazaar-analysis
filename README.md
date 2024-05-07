@@ -245,3 +245,92 @@ npm start
     "Geçmiş_Aylik_Ortalama_Ucret": 7.716346153846154
 }
 ```
+
+### Get compare by dates
+- URL: `/getcompared/:mal_adi/:yil1/:ay1/:yil2/:ay2`
+- Method: `GET`
+- Description: Calculates the monthly average `ORTALAMA_UCRET` for the provided `MAL_ADI`, start_year(yil1), start_month(ay1), end_year(yil2),end_month(ay2)
+- Örnek yanıt: 
+```json
+{
+	"Meyve_Sebze": "cilek",
+    "Baslangic_Tarihi1": "2023-3-01",
+    "Bitis_Tarihi1": "2023-4-01",
+    "Aylik_Ortalama_Ucret1": 28.796296296296298,
+    "Baslangic_Tarihi2": "2023-8-01",
+    "Bitis_Tarihi2": "2023-9-01",
+    "Aylik_Ortalama_Ucret2": 46.22222222222222,
+    "Yuzdelik_Fark": 60.51446945337619,
+    "Yorum": "8 - 2023 fiyatı, 3 - 2023 fiyatıdan %60.51 daha yüksek. Bu, fiyatların arttığını gösteriyor."
+}
+```
+
+### Get averages between selected dates by name
+- URL: `/getselectmonth/:mal_adi/:yil1/:ay1/:yil2/:ay2`
+- Method: `GET`
+- Description: Calculates the monthly averages `ORTALAMA_UCRET` for the provided `MAL_ADI`, start_year(yil1), start_month(ay1), end_year(yil2),end_month(ay2) between start and end dates
+- Örnek yanıt: 
+```json
+{
+    "Meyve_Sebze": "ayva",
+    "Baslangic_Tarihi": "2023-10-01",
+    "Bitis_Tarihi": "2023-12-01",
+    "Ortalama_Ucret": 19.08653846153846,
+    "Aylik_Ortalamalar": [
+        {
+            "_id": {
+                "year": 2023,
+                "month": 10
+            },
+            "Ortalama": 19.326923076923077
+        },
+        {
+            "_id": {
+                "year": 2023,
+                "month": 11
+            },
+            "Ortalama": 18.846153846153847
+        }
+    ]
+}
+```
+
+### Get averages between selected days by name
+- URL: `/getselectday/:mal_adi/:yil1/:ay1/:gun1/:yil2/:ay2/:gun2`
+- Method: `GET`
+- Description: Calculates the daily averages `ORTALAMA_UCRET` for the provided `MAL_ADI`, start_year(yil1), start_month(ay1), start_day(gun1), end_year(yil2),end_month(ay2), end_day(gun2) between start and end dates
+- Örnek yanıt:
+```json
+{
+    "Meyve_Sebze": "kabak",
+    "Baslangic_Tarihi": "2024-1-08",
+    "Bitis_Tarihi": "2024-1-11",
+    "Ortalama_Ucret": 18.416666666666668,
+    "Gunluk_Ortalamalar": [
+        {
+            "Gun": {
+                "day": 8,
+                "month": 1,
+                "year": 2024
+            },
+            "Ortalama": 19.25
+        },
+        {
+            "Gun": {
+                "day": 9,
+                "month": 1,
+                "year": 2024
+            },
+            "Ortalama": 18.25
+        },
+        {
+            "Gun": {
+                "day": 10,
+                "month": 1,
+                "year": 2024
+            },
+            "Ortalama": 17.75
+        }
+    ]
+}
+``` 
