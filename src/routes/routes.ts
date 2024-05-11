@@ -214,7 +214,7 @@ router.get('/getdate/:yil/:ay/:gun', async (req, res) => {
 router.get('/getay/:yil/:ay', async (req, res) => {
 	try {
 		const yil = req.params.yil;
-		let ay = Number(req.params.ay);
+		let ay = Number(req.params.ay.padStart(2, '0'));
 
 		if (ay > 12) {
 			res.status(500).json({ message: "12'den büyük değer alamaz" });
@@ -288,7 +288,7 @@ router.get('/getcomparepast/:mal_adi/:yil/:ay', async (req, res) => {
 	try {
 		const mal_adi = req.params.mal_adi.trim();
 		const regex = new RegExp(`^${mal_adi}`, 'i');
-		let yil = Number(req.params.yil.padStart(2, '0'));
+		let yil = Number(req.params.yil);
 		let ay = Number(req.params.ay.padStart(2, '0'));
 
 		if (ay > 12) {
@@ -354,9 +354,9 @@ router.get('/getcompared/:mal_adi/:yil1/:ay1/:yil2/:ay2', async (req, res) => {
 	try {
 		const mal_adi = req.params.mal_adi.trim();
 		const regex = new RegExp(`^${mal_adi}`, 'i');
-		let yil1 = Number(req.params.yil1.padStart(2, '0'));
+		let yil1 = Number(req.params.yil1);
 		let ay1 = Number(req.params.ay1.padStart(2, '0'));
-		let yil2 = Number(req.params.yil2.padStart(2, '0'));
+		let yil2 = Number(req.params.yil2);
 		let ay2 = Number(req.params.ay2.padStart(2, '0'));
 
 		if (ay1 > 12 || ay2 > 12) {
