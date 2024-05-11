@@ -89,16 +89,14 @@ router.get('/getOrt/:mal_adi/:yil/:ay', async (req, res) => {
 		let mal_adi = req.params.mal_adi.trim();
 		const regex = new RegExp(`${mal_adi.split(' ').join('\\s+')}`, 'i');
 		const yil = req.params.yil;
-		let ay = Number(req.params.ay);
+		let ay = Number(req.params.ay.padStart(2, '0'));
 
 		if (ay > 12) {
 			res.status(500).json({ message: "12'den büyük değer alamaz" });
 		} else {
-			const baslangic_tarihi = `${yil}-${ay < 10 ? '0' + ay : ay}-01`;
+			const baslangic_tarihi = `${yil}-${ay}-01`;
 			ay = ay + 1 > 12 ? 1 : ay + 1;
-			const bitis_tarihi = `${ay === 1 ? Number(yil) + 1 : yil}-${
-				ay < 10 ? '0' + ay : ay
-			}-01`;
+			const bitis_tarihi = `${ay === 1 ? Number(yil) + 1 : yil}-${ay}-01`;
 			const data = await Model.aggregate([
 				{
 					$match: {
