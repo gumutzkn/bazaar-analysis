@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const dataSchema = new mongoose.Schema({
 	TARIH: {
-		type: String,
+		type: Date,
 	},
 	MAL_TURU: {
 		type: String,
